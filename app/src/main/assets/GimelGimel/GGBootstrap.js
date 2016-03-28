@@ -46,3 +46,5 @@ GG.Utils.setScreenSpaceEventAction(GG.viewer, Cesium.ScreenSpaceEventType.LEFT_D
 GG.layerManager = new GG.Layers.LayersManager(GG.viewer);
 GG.cameraManager = new GG.CameraManager(GG.viewer.camera);
 
+GG.Utils.initializeEntitiesCreationBackgroundWebWorker();
+
