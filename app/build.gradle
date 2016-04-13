@@ -12,6 +12,18 @@ android {
         versionName "1.0"
     }
 
+    productFlavors {
+        home {
+            applicationId "com.teamagam.gimelgimel.home"
+            versionName "1.0-home"
+
+        }
+        field {
+            applicationId "com.teamagam.gimelgimel.field"
+            versionName "1.0-field"
+        }
+    }
+
     buildTypes {
         release {
 //          TODO: clean
@@ -25,6 +37,7 @@ android {
         debug {
             signingConfig signingConfigs.debug
             applicationIdSuffix ".debug"
+            debuggable true
         }
     }
 }
