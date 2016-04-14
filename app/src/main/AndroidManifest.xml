@@ -33,7 +33,7 @@
             android:name=".app.view.MainActivity"
             android:label="@string/activity_main_title"/>
         <activity
-            android:name=".app.view.settings.SettingsActivity"
+            android:name=".app.view.settings.SettingsActivityBase"
             android:label="@string/title_activity_settings"/>
         <activity
             android:name=".app.view.LoginActivity"

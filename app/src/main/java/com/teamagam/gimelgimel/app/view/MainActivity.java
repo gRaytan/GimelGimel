@@ -20,6 +20,7 @@ import com.teamagam.gimelgimel.app.control.sensors.GGLocation;
 import com.teamagam.gimelgimel.app.model.ViewsModels.DrawerListItem;
 import com.teamagam.gimelgimel.app.model.ViewsModels.Message;
 import com.teamagam.gimelgimel.app.model.ViewsModels.MessagePubSub;
+import com.teamagam.gimelgimel.app.utils.EnvironmentConstants;
 import com.teamagam.gimelgimel.app.utils.NetworkUtil;
 import com.teamagam.gimelgimel.app.view.adapters.DrawerListAdapter;
 import com.teamagam.gimelgimel.app.view.fragments.FriendsFragment;
@@ -29,7 +30,7 @@ import com.teamagam.gimelgimel.app.view.fragments.dialogs.ShowMessageDialogFragm
 import com.teamagam.gimelgimel.app.view.fragments.viewer_footer_fragments.BaseViewerFooterFragment;
 import com.teamagam.gimelgimel.app.view.fragments.viewer_footer_fragments.MapManipulationFooterFragment;
 import com.teamagam.gimelgimel.app.view.fragments.viewer_footer_fragments.VectorManipulationFooterFragment;
-import com.teamagam.gimelgimel.app.view.settings.SettingsActivity;
+import com.teamagam.gimelgimel.app.view.settings.SettingsActivityBase;
 import com.teamagam.gimelgimel.app.view.viewer.GGMap;
 import com.teamagam.gimelgimel.app.view.viewer.data.geometries.PointGeometry;
 
@@ -67,6 +68,8 @@ public class MainActivity extends BaseActivity<GGApplication>
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        String a = EnvironmentConstants.MESSAGING_API_BASE_URL;
 
         // Handling dynamic fragments section.
         // If this is the first time the Activity is created (and it's not a restart of it)
@@ -226,7 +229,7 @@ public class MainActivity extends BaseActivity<GGApplication>
                 startActivity(intent);
                 break;
             case R.id.action_settings:
-                intent = new Intent(this, SettingsActivity.class);
+                intent = new Intent(this, SettingsActivityBase.class);
                 startActivity(intent);
                 break;
             case R.id.action_friends:
