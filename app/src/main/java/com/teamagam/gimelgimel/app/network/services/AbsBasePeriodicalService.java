@@ -33,7 +33,7 @@ public abstract class AbsBasePeriodicalService<T> extends IntentService {
      * @param context
      * @see IntentService
      */
-    public static void startActionPolling(Context context) {
+    private static void startActionPolling(Context context) {
         Intent intent = new Intent(context, CURRENT_CLASS);
         intent.setAction(ACTION_NAME);
         context.startService(intent);
@@ -46,6 +46,11 @@ public abstract class AbsBasePeriodicalService<T> extends IntentService {
      * @param period  - amount of time in milliseconds between subsequent executions.
      */
     public static void startPollingPeriodically(final Context context, long period) {
+
+        if (period < 0){
+            throw new IllegalArgumentException("Time betweem executions cant be negative in startPollingPeriodically");
+        }
+
         Timer t = new Timer("pollingTimer", true /*isDaemon*/);
 
         TimerTask pollingTask = new TimerTask() {
