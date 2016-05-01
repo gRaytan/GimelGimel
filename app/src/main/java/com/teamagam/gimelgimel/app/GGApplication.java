@@ -30,7 +30,7 @@ public class GGApplication extends Application {
 
         int serviceFrequencyMs = getResources().getInteger(
                 R.integer.messaging_service_polling_frequency_ms);
-        GGMessagePollingService.startMessagePollingPeriodically(this, serviceFrequencyMs);
+        GGMessagePollingService.startPollingPeriodically(this, serviceFrequencyMs);
     }
 
     private void CheckIfAppUpdated() {

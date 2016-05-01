@@ -18,75 +18,33 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * An {@link IntentService} subclass for handling asynchronous task requests in
+ * An {@link IntentService, AbsBasePeriodicalSevice}
+ * subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
  * <p/>
  * Polls for new messages from remote service on request.
  */
-public class GGMessagePollingService extends IntentService {
-
-    public static final String LOG_TAG = GGMessagePollingService.class.getSimpleName();
-
-    private static final String ACTION_MESSAGE_POLLING =
-            "com.teamagam.gimelgimel.app.network.services.action.MESSAGE_POLLING";
+public class GGMessagePollingService
+        extends AbsBasePeriodicalService<Message> {
 
     public GGMessagePollingService() {
+
         super("GGMessagePollingService");
+        LOG_TAG = GGMessagePollingService.class.getSimpleName();
+        ACTION_NAME =  "com.teamagam.gimelgimel.app.network.services.action.MESSAGE_POLLING";
+        CURRENT_CLASS = GGMessagePollingService.class;
     }
-
-
-    /**
-     * Starts this service to perform message polling action. If the service is
-     * already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    public static void startActionMessagePolling(Context context) {
-        Intent intent = new Intent(context, GGMessagePollingService.class);
-        intent.setAction(ACTION_MESSAGE_POLLING);
-        context.startService(intent);
-    }
-
-    /**
-     * Sets this service to periodically start performing message polling action
-     *
-     * @param context - to be used to construct every new action intent
-     * @param period  - amount of time in milliseconds between subsequent executions.
-     */
-    public static void startMessagePollingPeriodically(final Context context, long period) {
-        Timer t = new Timer("pollingTimer", true /*isDaemon*/);
-
-        TimerTask pollingTask = new TimerTask() {
-            @Override
-            public void run() {
-                GGMessagePollingService.startActionMessagePolling(context);
-            }
-        };
-
-        t.scheduleAtFixedRate(pollingTask, 0, period);
-    }
-
-    /**
-     * Executes on new intent received by service.
-     * Maps between given intent action and its appropriate action.
-     *
-     * @param intent - injected externally by Android with generating intent
-     */
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_MESSAGE_POLLING.equals(action)) {
-                handleActionMessagePolling();
+            if (ACTION_NAME.equals(action)) {
+                handleActionPolling();
             }
         }
     }
-
-    /**
-     * Handle message polling action in a background thread (provided by the
-     * {@link IntentService} class).
-     */
-    private void handleActionMessagePolling() {
+    protected void handleActionPolling()
+    {
         PreferenceUtil prefUtils = new PreferenceUtil(getResources(),
                 PreferenceManager.getDefaultSharedPreferences(this));
         //get latest synchronized date from shared prefs
@@ -103,7 +61,7 @@ public class GGMessagePollingService extends IntentService {
             return;
         }
 
-        processNewMessages(messages);
+        processNewItems(messages);
 
         Message maximumMessageDateMessage = getMaximumDateMessage(messages);
         long newSynchronizedDateMs = maximumMessageDateMessage.getCreatedAt().getTime();
@@ -113,15 +71,13 @@ public class GGMessagePollingService extends IntentService {
                 newSynchronizedDateMs);
         Log.d(LOG_TAG, "New synchronization date (ms) set to " + newSynchronizedDateMs);
     }
-
-
     /**
      * Process given messages
      *
      * @param messages - messages to process
      */
-    private void processNewMessages(Collection<Message> messages) {
-        Log.d(LOG_TAG, "MessagePolling service processing " + messages.size() + " new messages");
+    protected void processNewItems(Collection<Message> messages) {
+        Log.d(LOG_TAG, "MessagePolling service processing in" + ACTION_NAME + messages.size() + " new messages");
 
         for (Message m :
                 messages) {
