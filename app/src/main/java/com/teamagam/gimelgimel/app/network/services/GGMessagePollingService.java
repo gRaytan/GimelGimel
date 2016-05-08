@@ -1,8 +1,6 @@
 package com.teamagam.gimelgimel.app.network.services;
 
 import android.app.IntentService;
-import android.content.Context;
-import android.content.Intent;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -14,8 +12,6 @@ import com.teamagam.gimelgimel.app.utils.PreferenceUtil;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * An {@link IntentService, AbsBasePeriodicalSevice}
@@ -27,22 +23,29 @@ import java.util.TimerTask;
 public class GGMessagePollingService
         extends AbsBasePeriodicalService<Message> {
 
-    public GGMessagePollingService() {
+    private static final String LOG_TAG = GGMessagePollingService.class.getSimpleName();
 
+    //todo: move to config
+    private static final int MSG_POLLING_SERVICE_TIME_BETWEEN_EXECUTION_MS = 5000;
+    private static final String MESSAGE_POLLING_ACTION_NAME =
+            "com.teamagam.gimelgimel.app.network.services.action.MESSAGE_POLLING_FROM_SERVER";
+
+    public GGMessagePollingService() {
         super("GGMessagePollingService");
-        LOG_TAG = GGMessagePollingService.class.getSimpleName();
-        ACTION_NAME =  "com.teamagam.gimelgimel.app.network.services.action.MESSAGE_POLLING";
-        CURRENT_CLASS = GGMessagePollingService.class;
     }
+
     @Override
-    protected void onHandleIntent(Intent intent) {
-        if (intent != null) {
-            final String action = intent.getAction();
-            if (ACTION_NAME.equals(action)) {
-                handleActionPolling();
-            }
-        }
+    protected String getActionName()
+    {
+        return MESSAGE_POLLING_ACTION_NAME;
     }
+
+    @Override
+    protected int getTimeBetweenExecutionsMs() {
+        return MSG_POLLING_SERVICE_TIME_BETWEEN_EXECUTION_MS;
+    }
+
+    @Override
     protected void handleActionPolling()
     {
         PreferenceUtil prefUtils = new PreferenceUtil(getResources(),
@@ -60,7 +63,6 @@ public class GGMessagePollingService
             Log.d(LOG_TAG, "No new messages available");
             return;
         }
-
         processNewItems(messages);
 
         Message maximumMessageDateMessage = getMaximumDateMessage(messages);
@@ -76,8 +78,9 @@ public class GGMessagePollingService
      *
      * @param messages - messages to process
      */
+    @Override
     protected void processNewItems(Collection<Message> messages) {
-        Log.d(LOG_TAG, "MessagePolling service processing in" + ACTION_NAME + messages.size() + " new messages");
+        Log.d(LOG_TAG, "MessagePolling service processing in" + getActionName() + messages.size() + " new messages");
 
         for (Message m :
                 messages) {
@@ -85,6 +88,11 @@ public class GGMessagePollingService
         }
     }
 
+    /**
+     * Retrieves the latest date ctreatd of the messages
+     * @param messages - messages to check
+     * @return Message - represents the message with latest date
+     */
     private Message getMaximumDateMessage(Collection<Message> messages) {
         Message m = Collections.max(messages, new Comparator<Message>() {
             @Override

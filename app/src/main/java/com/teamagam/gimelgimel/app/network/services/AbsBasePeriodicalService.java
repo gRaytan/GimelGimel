@@ -13,16 +13,9 @@ import java.util.TimerTask;
  */
 public abstract class AbsBasePeriodicalService<T> extends IntentService {
 
-    protected static String LOG_TAG;
-    protected static String ACTION_NAME;
-    protected static Class<?> CURRENT_CLASS;
+    protected static final int FIRST_DELAY = 0;
 
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
-     * @param name Used to name the worker thread, important only for debugging.
-     */
-    public AbsBasePeriodicalService(String name) {
+    protected AbsBasePeriodicalService(String name) {
         super(name);
     }
 
@@ -33,9 +26,9 @@ public abstract class AbsBasePeriodicalService<T> extends IntentService {
      * @param context
      * @see IntentService
      */
-    private static void startActionPolling(Context context) {
-        Intent intent = new Intent(context, CURRENT_CLASS);
-        intent.setAction(ACTION_NAME);
+    private void startActionPolling(Context context) {
+        Intent intent = new Intent(context, this.getClass());
+        intent.setAction(getActionName());
         context.startService(intent);
     }
 
@@ -43,14 +36,22 @@ public abstract class AbsBasePeriodicalService<T> extends IntentService {
      * Sets this service to periodically start performing polling action
      *
      * @param context - to be used to construct every new action intent
-     * @param period  - amount of time in milliseconds between subsequent executions.
      */
-    public static void startPollingPeriodically(final Context context, long period) {
+    public void startPollingPeriodically(final Context context) {
 
-        if (period < 0){
+        if (getTimeBetweenExecutionsMs() < 0){
             throw new IllegalArgumentException("Time betweem executions cant be negative in startPollingPeriodically");
         }
+        startTimerAndSchedule(context, FIRST_DELAY);
+    }
 
+    /**
+     * Starts a Timer and TimerTask to perform service launching after a delay
+     *
+     * @param context - to be used to construct every new action intent
+     * @param delay - to define how much time we need to wait berfore exectution
+     */
+    protected void startTimerAndSchedule(final Context context, int delay){
         Timer t = new Timer("pollingTimer", true /*isDaemon*/);
 
         TimerTask pollingTask = new TimerTask() {
@@ -59,18 +60,33 @@ public abstract class AbsBasePeriodicalService<T> extends IntentService {
                 startActionPolling(context);
             }
         };
-
-        t.scheduleAtFixedRate(pollingTask, 0, period);
+        t.schedule(pollingTask,delay);
     }
-
     /**
      * Executes on new intent received by service.
      * Maps between given intent action and its appropriate action.
+     * handles the action by invoking handleActionPolling
+     * *finaly, starts a new scheduler for a new request
      *
      * @param intent - injected externally by Android with generating intent
      */
     @Override
-    abstract protected void onHandleIntent(Intent intent);
+    protected void onHandleIntent(Intent intent) {
+        if (intent != null) {
+            final String action = intent.getAction();
+            if (getActionName().equals(action)) {
+                handleActionPolling();
+            }
+            startTimerAndSchedule(getBaseContext(), getTimeBetweenExecutionsMs());
+        }
+    }
+
+    /**
+     * setters for the Constants (by Sub classes)
+     */
+    abstract protected String getActionName();
+
+    abstract protected int getTimeBetweenExecutionsMs();
 
     /**
      * Handle items polling action in a background thread (provided by the
