@@ -8,9 +8,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 
@@ -22,7 +27,7 @@ import static org.mockito.Mockito.*;
 public class AbsBasePeriodicalServiceTests extends InstrumentationTestCase {
 
     public static final String ACTION_NAME = "ActionName";
-    public static final int DELAY_PERIOD = 1000;
+    public static final int DELAY_PERIOD = 10000;
     AbsBasePeriodicalService mMockAbsService;
     Context mContext;
     @Before
@@ -30,8 +35,6 @@ public class AbsBasePeriodicalServiceTests extends InstrumentationTestCase {
 
         //mocking the abs class
         mMockAbsService = mock(AbsBasePeriodicalService.class, Mockito.CALLS_REAL_METHODS);
-
-
 
         //context creation
         mContext = RuntimeEnvironment.application.getApplicationContext();
@@ -84,12 +87,20 @@ public class AbsBasePeriodicalServiceTests extends InstrumentationTestCase {
 
     @Test
     public void testStartPolling_testWhetherServiceLaunchedSeveralTimes_shouldVerifyMethodInvoked() {
-//        //arrange
-//        mMockAbsService.startPollingPeriodically(mContext);
-//        Intent intent = new Intent();
-//
-//        //verify
-//        verify(mMockAbsService, times(1)).onHandleIntent(intent);
+        final List<String> results = Arrays.asList("One", "Two", "Three");
+        // Let's do a synchronous answer for the callback
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                return true;
+            }
+        }).when(mMockAbsService).onHandleIntent
+
+        // Let's call the method under test
+        mMockAbsService.startPollingPeriodically(mContext);
+
+        // Verify state and interaction
+        verify(mMockAbsService,after(DELAY_PERIOD).times(1)).onHandleIntent(anyObject());
     }
 
 //
