@@ -7,6 +7,7 @@ import rx.Subscriber;
 
 /**
  * Base interactor for acting on model to change data
+ * @deprecated
  */
 public abstract class DoInteractor<T> extends AbsInteractor<T> {
 
