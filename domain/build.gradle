@@ -1,10 +1,10 @@
 apply plugin:'java'
 //This plugin is needed for android-studio to recognize the generated classes
-apply plugin: "idea"
-apply plugin: "me.tatarka.retrolambda"
+apply plugin: 'idea'
+apply plugin: 'me.tatarka.retrolambda'
 //apt equivalent for java projects
 //see more at: http://stackoverflow.com/questions/37942717/how-do-i-get-dagger-2-to-work-with-android-studio-java-library-project
-apply plugin: "net.ltgt.apt"
+apply plugin: 'net.ltgt.apt'
 
 //noinspection GroovyUnusedAssignment
 sourceCompatibility = 1.8

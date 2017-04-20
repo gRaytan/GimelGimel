@@ -14,10 +14,15 @@ import com.teamagam.gimelgimel.data.map.repository.DisplayedEntitiesDataReposito
 import com.teamagam.gimelgimel.data.map.repository.GeoEntitiesDataRepository;
 import com.teamagam.gimelgimel.data.map.repository.SelectedEntityDataRepository;
 import com.teamagam.gimelgimel.data.map.repository.SingleDisplayedItemDataRepository;
+import com.teamagam.gimelgimel.data.message.adapters.MessageDataMapper;
 import com.teamagam.gimelgimel.data.message.repository.MessagesDataRepository;
-import com.teamagam.gimelgimel.data.message.repository.ObjectMessageDataMapper;
 import com.teamagam.gimelgimel.data.message.repository.NewMessageIndicationDataRepository;
+import com.teamagam.gimelgimel.data.message.repository.ObjectMessageDataMapper;
+import com.teamagam.gimelgimel.data.message.repository.SelectedMessageRepository;
 import com.teamagam.gimelgimel.data.message.repository.UnreadMessagesCountDataRepository;
+import com.teamagam.gimelgimel.data.message.repository.cache.MessageCache;
+import com.teamagam.gimelgimel.data.message.repository.cache.realm.RealmMessageCache;
+import com.teamagam.gimelgimel.data.message.repository.cloud.CloudMessagesSource;
 import com.teamagam.gimelgimel.data.notifications.PersistentConnectivityStatusRepositoryImpl;
 import com.teamagam.gimelgimel.data.rasters.repository.IntermediateRasterVisibilityDataRepository;
 import com.teamagam.gimelgimel.data.rasters.repository.IntermediateRastersRepositoryData;
@@ -47,6 +52,8 @@ import com.teamagam.gimelgimel.domain.rasters.repository.IntermediateRastersRepo
 import com.teamagam.gimelgimel.domain.sensors.repository.SelectedSensorRepository;
 import com.teamagam.gimelgimel.domain.sensors.repository.SensorsRepository;
 import com.teamagam.gimelgimel.domain.user.repository.UserPreferencesRepository;
+
+import java.util.concurrent.Executors;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -81,8 +88,17 @@ public class RepositoryModule {
 
     @Provides
     @Singleton
-    MessagesRepository provideMessagesRepository(MessagesDataRepository messageRepo) {
-        return messageRepo;
+    MessagesRepository provideMessagesRepository(CloudMessagesSource cms,
+                                                 MessageCache cache,
+                                                 SelectedMessageRepository smr,
+                                                 MessageDataMapper messageMapper) {
+        return new MessagesDataRepository(cms, cache, smr, messageMapper);
+    }
+
+    @Provides
+    @Singleton
+    MessageCache provideMessageCache(MessageDataMapper messageMapper) {
+        return new RealmMessageCache(Executors.newSingleThreadExecutor(), messageMapper);
     }
 
     @Provides

@@ -12,6 +12,10 @@ import com.teamagam.gimelgimel.domain.base.logging.LoggerFactory;
 
 import javax.inject.Inject;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.rx.RealmObservableFactory;
+
 public class GGApplication extends Application {
 
     @Inject
@@ -37,6 +41,7 @@ public class GGApplication extends Application {
     }
 
     private void init() {
+        initializeRealm();
         initializeInjector();
         initializeLoggers();
         initializeMessagePolling();
@@ -46,6 +51,14 @@ public class GGApplication extends Application {
         mApplicationComponent.loadAllCachedLayersInteractor().execute();
         mApplicationComponent.loadIntermediateRastersInteractor().execute();
         mApplicationComponent.update3GConnectivityStatusInteractor().execute();
+    }
+
+    private void initializeRealm() {
+        Realm.init(this);
+        RealmConfiguration configuration = new RealmConfiguration.Builder()
+                .deleteRealmIfMigrationNeeded()
+                .build();
+        Realm.setDefaultConfiguration(configuration);
     }
 
     private void initializeMessagePolling() {

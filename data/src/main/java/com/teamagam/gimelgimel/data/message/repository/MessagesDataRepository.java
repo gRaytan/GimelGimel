@@ -1,31 +1,27 @@
 package com.teamagam.gimelgimel.data.message.repository;
 
 import com.teamagam.gimelgimel.data.message.adapters.MessageDataMapper;
-import com.teamagam.gimelgimel.data.message.repository.InMemory.InMemoryMessagesCache;
+import com.teamagam.gimelgimel.data.message.repository.cache.MessageCache;
 import com.teamagam.gimelgimel.data.message.repository.cloud.CloudMessagesSource;
 import com.teamagam.gimelgimel.domain.messages.entity.Message;
 import com.teamagam.gimelgimel.domain.messages.repository.MessagesRepository;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import rx.Observable;
 
-@Singleton
 public class MessagesDataRepository implements MessagesRepository {
 
     private final CloudMessagesSource mSource;
-    private final InMemoryMessagesCache mCache;
+    private final MessageCache mCache;
     private final SelectedMessageRepository mSelectedRepo;
-    @Inject
-    MessageDataMapper mMessageDataMapper;
+    private final MessageDataMapper mMessageDataMapper;
 
-    @Inject
     public MessagesDataRepository(CloudMessagesSource cloudMessagesSource,
-                                  InMemoryMessagesCache inMemoryMessagesCache,
-                                  SelectedMessageRepository selectedMessageRepository) {
+                                  MessageCache messageCache,
+                                  SelectedMessageRepository selectedMessageRepository,
+                                  MessageDataMapper messageDataMapper) {
         mSource = cloudMessagesSource;
-        mCache = inMemoryMessagesCache;
+        mCache = messageCache;
+        mMessageDataMapper = messageDataMapper;
         mSelectedRepo = selectedMessageRepository;
     }
 
@@ -46,18 +42,18 @@ public class MessagesDataRepository implements MessagesRepository {
 
     @Override
     public void putMessage(Message message) {
-        mCache.addMessage(message);
+        mCache.saveMessage(message);
     }
 
     @Override
     public Observable<Message> sendMessage(Message message) {
         return mSource.sendMessage(mMessageDataMapper.transformToData(message))
-                .map(mMessageDataMapper::tryTransform);
+                .map(mMessageDataMapper::transform);
     }
 
     @Override
     public Message getMessage(String messageId) {
-        return mCache.getMessageById(messageId);
+        return mCache.getMessage(messageId);
     }
 
     @Override
